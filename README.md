@@ -13,15 +13,34 @@ A Playwright-based automation tool for [Mixamo](https://www.mixamo.com), with bo
 
 ## Setup
 
+Requires the [Brave](https://brave.com) browser (macOS). Playwright drives the installed Brave; no Chromium download is needed.
+
 ```bash
-pip install -r requirements.txt
-playwright install chromium
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 ```
+
+Configuration (environment variables, both optional):
+
+| Variable | Default |
+|---|---|
+| `MIXAMO_BRAVE_PATH` | `/Applications/Brave Browser.app/Contents/MacOS/Brave Browser` |
+| `MIXAMO_PROFILE_DIR` | `~/Library/Application Support/mixamo-mcp/brave-profile` |
+
+The profile is a dedicated folder for this tool. Never point it at your real Brave profile.
+
+### One-time login
+
+```bash
+.venv/bin/python login.py
+```
+
+A visible Brave window opens on mixamo.com. Log in yourself; the script never handles credentials. When it detects the login it prints that the session is saved and exits. If you close the window first it exits with an error. The MCP server then runs headless with the same profile.
 
 ## CLI usage
 
 ```bash
-python main.py
+.venv/bin/python main.py
 ```
 
 Available commands:
@@ -44,14 +63,14 @@ The MCP server lets Claude Code control Mixamo directly as tools.
 
 ### Configure
 
-Add to your `.mcp.json` (already included in this repo):
+Add to your `.mcp.json`, with your own paths:
 
 ```json
 {
   "mcpServers": {
     "mixamo": {
-      "command": "python",
-      "args": ["C:\\Users\\vital\\Projects\\mixamo-mcp\\mcp_server.py"]
+      "command": "/path/to/mixamo-mcp/.venv/bin/python",
+      "args": ["/path/to/mixamo-mcp/mcp_server.py"]
     }
   }
 }
@@ -84,4 +103,4 @@ Add to your `.mcp.json` (already included in this repo):
 ## Notes
 
 - Do not run `main.py` and `mcp_server.py` at the same time — both use the same browser profile
-- Log in once via the visible browser; session is saved in `browser_profile/`
+- Log in once with `login.py`; the session is saved in the dedicated Brave profile (see `MIXAMO_PROFILE_DIR`)

@@ -3,15 +3,20 @@
 MCP server for mixamo-operator.
 Exposes Mixamo automation as tools for Claude Code.
 
+Runs headless in the installed Brave, using a dedicated profile. Log in once first:
+  /path/to/mixamo-mcp/.venv/bin/python /path/to/mixamo-mcp/login.py
+
 Usage — add to Claude Code MCP settings:
   {
     "mcpServers": {
       "mixamo": {
-        "command": "python",
-        "args": ["C:\\\\Users\\\\vital\\\\Projects\\\\mixamo-operator\\\\mcp_server.py"]
+        "command": "/path/to/mixamo-mcp/.venv/bin/python",
+        "args": ["/path/to/mixamo-mcp/mcp_server.py"]
       }
     }
   }
+
+Env vars: MIXAMO_BRAVE_PATH (Brave binary), MIXAMO_PROFILE_DIR (profile folder).
 
 NOTE: Do not run main.py at the same time — both use the same browser profile.
 """
@@ -20,6 +25,7 @@ from pathlib import Path
 from mcp.server.fastmcp import FastMCP
 from playwright.async_api import async_playwright, BrowserContext, Page
 
+from brave_config import launch_options
 from screens.auth import is_logged_in
 from screens.animations import (
     get_character_name,
@@ -31,7 +37,6 @@ from screens.download import get_settings as get_download_settings
 from screens.upload import get_status as get_upload_status
 
 MIXAMO_URL = "https://www.mixamo.com"
-PROFILE_DIR = Path(__file__).parent / "browser_profile"
 
 mcp = FastMCP("mixamo-mcp")
 
@@ -49,10 +54,9 @@ async def _get_page() -> Page:
         except Exception:
             _page = None
 
-    PROFILE_DIR.mkdir(exist_ok=True)
     _pw = await async_playwright().start()
     _context = await _pw.chromium.launch_persistent_context(
-        user_data_dir=str(PROFILE_DIR),
+        **launch_options(),
         headless=True,
         viewport={"width": 1280, "height": 900},
     )
