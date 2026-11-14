@@ -1,4 +1,4 @@
-browser_profile/
+.venv/
 page_dump.html
 __pycache__/
 *.pyc

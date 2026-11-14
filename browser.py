@@ -1,8 +1,7 @@
-from pathlib import Path
 from playwright.sync_api import sync_playwright, BrowserContext, Page
 from screens.auth import is_logged_in
+from brave_config import launch_options
 
-PROFILE_DIR = Path(__file__).parent / "browser_profile"
 MIXAMO_URL = "https://www.mixamo.com"
 
 _pw = None
@@ -12,10 +11,9 @@ _page: Page = None
 
 def _launch(headless: bool) -> Page:
     global _pw, _context, _page
-    PROFILE_DIR.mkdir(exist_ok=True)
     _pw = sync_playwright().start()
     _context = _pw.chromium.launch_persistent_context(
-        user_data_dir=str(PROFILE_DIR),
+        **launch_options(),
         headless=headless,
         viewport={"width": 1280, "height": 900},
     )
